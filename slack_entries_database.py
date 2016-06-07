@@ -4,7 +4,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:C2rimson@localhost/mydatabase'
+# add password to server at ADDPASSWORDHERE in line below (line 8)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:ADDPASSWORDHERE@localhost/mydatabase'
 db = SQLAlchemy(app)
   
 class slack_user(db.Model):
