@@ -1,18 +1,19 @@
 import datetime
 from slacker import Slacker
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from slack_entries_database import db
 
-from slack_entries_database import Slackuser, Messagechannel, Message, Base
+from slack_entries_database import slack_user, message_channel, message
 
-#from sqlalchemy_declarative import Address, Base, Person
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
-slackconnect = Slacker("")
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/db'
+db = SQLAlchemy(app)
 
-#def getAllChannels():
-    #channels = slackconnect.
-   # return users
+slackconnect = Slacker("xoxp-48585661490-48566956614-48957258242-7cc1bd3785")
+
+
 def getUserInformation():
     userInfo = []
     responseObject = slackconnect.users.list()
@@ -53,61 +54,58 @@ def getMessageInfo(channel):
     return messageLogInfo
 
 def pushData(messages, users, channels):
-    engine = create_engine('sqlite:///sqlalchemy_example.db')
-    Base.metadata.bind = engine
-    DBSession = sessionmaker(bind=engine)
-    session = DBSession()
+    db.create_all()
 
     # Insert messages in the message table
-    sendMessagesToDatabase(messages, session)
+    sendMessagesToDatabase(messages)
     # Insert channels in the channel table
-    sendChannelsToDatabase(channels, session) 
+    sendChannelsToDatabase(channels) 
     #Inser users in the the user table
-    sendUsersToDatabase(users, session)   
-     
+    sendUsersToDatabase(users)   
+    
+    db.session.commit()     
 
-def sendChannelsToDatabase(channels, session):
-    counter =0
+def sendChannelsToDatabase(channels):
     for channel in channels:
         channelId = channel[0]
         channelName = channel[1]
-        counter += 1
 
-        new_channel = Messagechannel(channel_id = counter, channel_number = channelId, channel_name = channelName)
-        session.add(new_channel)
-        session.commit()
+        new_channel = message_channel(channelId, channelName)
+        db.session.add(new_channel)
 
 
-def sendUsersToDatabase(users, session):
-    counter = 0
+def sendUsersToDatabase(users):
     for user in users:
         userId = user[0]
         userFirst = user[1]
         userLast = user[2]
-        counter +=1
 
-        new_user = Slackuser(slack_user_id = counter, username = userId, first_name = userFirst, last_name = userLast)
-        session.add(new_user)
-        session.commit()
+        new_user = slack_user(userId, userFirst, userLast)
+        db.session.add(new_user)
 
 
-def sendMessagesToDatabase(messages, session):
-    counter = 0
+def sendMessagesToDatabase(messages):
     for message in messages:
         userId = message[0]
         text = message[1]
         datetime = datetime(message[2])
         channel = message[3]
         counter +=1
-        oneMessage = Message(message_id = counter, slack_user_id = userId, channel_id = channel, date_time = datetime, message = text)
-        session.add(oneMessage)
-        session.commit()
+        new_message = message(userId, channel, datetime,  text)
+        db.session.add(new_message)
+        
 
 def datetime(timestamp):
     datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+
+def Query():
+    messages = message.query.all()
+    #today = message.query.filter_by(text='#today').first()
 
 
 if __name__ == '__main__':
     channels = getChannelInfo()
     messages = getMessageInfo("C1EGNU95L")
     users = getUserInformation()
+
+    print (Query())
