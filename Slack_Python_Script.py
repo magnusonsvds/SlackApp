@@ -8,10 +8,10 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:C2rimson@localhost/slacktestdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1Svds@123@localhost/slacktestdb'
 db = SQLAlchemy(app)
 
-slackconnect = Slacker("xoxp-48585661490-48566956614-48985030439-bcbbfeeab3")
+slackconnect = Slacker("xoxp-48585661490-48566956614-49183403814-0bd90fc171")
 
 
 def getUserInformation():
@@ -53,13 +53,25 @@ def getMessageInfo(channel):
         messageLogInfo.append(messageInfo)
     return messageLogInfo
 
-def pushData(messages, users, channels):
-    db.create_all()
-
-    # Insert messages in the message table
+def insertData(messages, users, channels):
     sendMessagesToDatabase(messages)
-    # Insert channels in the channel table
     sendChannelsToDatabase(channels) 
+    sendUsersToDatabase(users)
+    db.session.commit()  
+
+
+def pushData(messages, users, channels):
+
+    userQuery = slack_user.query.all()
+    if (len(userQuery) > len(users)):
+        # Insert messages in the message table
+        sendMessagesToDatabase(messages)
+
+    channelQuery = message_channel.query.all()
+    if (len(channelQuery) > len(channels)):
+        # Insert channels in the channel table
+        sendChannelsToDatabase(channels) 
+
     #Inser users in the the user table
     sendUsersToDatabase(users)   
     
@@ -67,31 +79,31 @@ def pushData(messages, users, channels):
 
 def sendChannelsToDatabase(channels):
     for channel in channels:
-        channelId = channel[0]
+        channelNum = channel[0]
         channelName = channel[1]
 
-        new_channel = message_channel(channelId, channelName)
+        new_channel = message_channel(channelNum, channelName)
         db.session.add(new_channel)
 
 
 def sendUsersToDatabase(users):
     for user in users:
-        userId = user[0]
+        userNum = user[0]
         userFirst = user[1]
         userLast = user[2]
 
-        new_user = slack_user(userId, userFirst, userLast)
+        new_user = slack_user(userNum, userFirst, userLast)
         db.session.add(new_user)
 
 
 def sendMessagesToDatabase(messages):
     for mess in messages:
-        userId = mess[0]
+        userNum = mess[0]
         text = mess[1]
         date = datetimeChange(mess[2])
-        channel = mess[3]
+        channelNum = mess[3]
 
-        new_message = message(userId, channel, date, text)
+        new_message = message(date, text, userNum, channelNum)
         db.session.add(new_message)
         
 
@@ -107,6 +119,5 @@ if __name__ == '__main__':
     channels = getChannelInfo()
     messages = getMessageInfo("C1EGNU95L")
     users = getUserInformation()
-
+    insertData(messages, users, channels)
     pushData(messages, users, channels)
-    print (Query())
