@@ -4,13 +4,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:C2rimson@localhost/slacktestdb'
+# Update password for sql at ADDPASSWORDHERE in the line below
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:ADDPASSWORDHERE@localhost/slacktestdb'
 db = SQLAlchemy(app)
   
 class slack_user(db.Model):
 	#include the line: __tablename__ = 'slack_user'  ????
     # define columns for the table person
-    slack_user_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    slack_user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50))
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
@@ -27,7 +28,7 @@ class slack_user(db.Model):
 
 class message_channel(db.Model):
     # Here we define columns for the table address.
-    channel_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    channel_id = db.Column(db.Integer, primary_key=True)
     channel_number = db.Column(db.String(50))
     channel_name = db.Column(db.String(50))
 
@@ -41,7 +42,7 @@ class message_channel(db.Model):
 
 
 class message(db.Model):
-    message_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    message_id = db.Column(db.Integer, primary_key=True)
     slack_user_id = db.Column(db.BigInteger, db.ForeignKey(slack_user.slack_user_id))
     channel_id = db.Column(db.BigInteger, db.ForeignKey(message_channel.channel_id))
     date_time = db.Column(db.DateTime)
