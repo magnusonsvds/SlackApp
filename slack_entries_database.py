@@ -5,62 +5,60 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 # Update password for sql at ADDPASSWORDHERE in the line below
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:ADDPASSWORDHERE@localhost/slacktestdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:PASSWORDHERE@localhost/slacktestdb'
 db = SQLAlchemy(app)
   
 class slack_user(db.Model):
 	#include the line: __tablename__ = 'slack_user'  ????
     # define columns for the table person
-    slack_user_id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50))
+    ID = db.Column(db.Integer, primary_key=True)
+    slack_number = db.Column(db.String(50))
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
 
-    def __init__(self, slack_user_id, username, first_name, last_name):
-    	self.slack_user_id = slack_user_id
-    	self.username = username
+    def __init__(self, ID, slack_number, first_name, last_name):
+    	self.ID = ID
+    	self.slack_number = slack_number
     	self.first_name = first_name
     	self.last_name = last_name
 
     def __repr__(self):
-    	return '<slack_user %r>' % self.slack_user_id	
+    	return '<slack_user %r>' % self.ID	
 
 
 class message_channel(db.Model):
     # Here we define columns for the table address.
-    channel_id = db.Column(db.Integer, primary_key=True)
+    ID = db.Column(db.Integer, db.Sequence('user_id_seq'), primary_key=True)
     channel_number = db.Column(db.String(50))
     channel_name = db.Column(db.String(50))
 
-    def __init__(self, channel_id, channel_number, channel_name):
-    	self.channel_id = channel_id
+    def __init__(self, ID, channel_number, channel_name):
+    	self.ID = ID
     	self.channel_number = channel_number
     	self.channel_name = channel_name
 
     def __repr__(self):
-    	return '<message_channel %r>' % self.channel_id
+    	return '<message_channel %r>' % self.ID
 
 
 class message(db.Model):
-    message_id = db.Column(db.Integer, primary_key=True)
-    slack_user_id = db.Column(db.Integer, db.ForeignKey(slack_user.slack_user_id))
-    channel_id = db.Column(db.Integer, db.ForeignKey(message_channel.channel_id))
+    ID = db.Column(db.Integer, db.Sequence('user_id_seq'), primary_key=True)
     date_time = db.Column(db.DateTime)
     msg = db.Column(db.String(2000))
-    slack_user = db.relationship(slack_user)
-    message_channel = db.relationship(message_channel)
+    slack_number = db.Column(db.String(50))
+    channel_number = db.Column(db.String(50))
 
-    def __init__(self, message_id, slack_user_id, channel_id, date_time, msg):
-    	self.message_id = message_id
-    	self.slack_user_id = slack_user_id
-    	self.channel_id = channel_id
-    	if date_time is None:
-    			date_time = datetime.utcnow()
-    	self.date_time = date_time
-    	self.msg = msg
+    def __init__(self, ID, date_time, msg, slack_number, channel_number):
+        self.ID = ID
+        if date_time is None:
+            date_time = datetime.utcnow()
+        self.date_time = date_time
+        self.msg = msg
+        self.slack_number = slack_number
+        slef.channel_number =  channel_number
 
     def __repr__(self):
-    	return '<message %r>' % self.message_id
+        return '<message %r>' % self.ID
 
 
 ''' notes
