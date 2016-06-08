@@ -12,7 +12,7 @@ class slack_user(db.Model):
     #include the line: __tablename__ = 'slack_user'  ????
     # define columns for the table person
     ID = db.Column(db.Integer, primary_key=True)
-    slack_number = db.Column(db.String(50))
+    slack_number = db.Column(db.String(50), unique=True)
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
 
@@ -28,7 +28,7 @@ class slack_user(db.Model):
 class message_channel(db.Model):
     # Here we define columns for the table address.
     ID = db.Column(db.Integer, db.Sequence('user_id_seq'), primary_key=True)
-    channel_number = db.Column(db.String(50))
+    channel_number = db.Column(db.String(50), unique=True)
     channel_name = db.Column(db.String(50))
 
     def __init__(self, channel_number, channel_name):
@@ -58,6 +58,5 @@ class message(db.Model):
         return '<message %r>' % self.ID
 db.create_all()
 
-''' notes
-TRUE was changed from NONE in /Users/james/anaconda/lib/python3.5/site-packages/flask_sqlalchemy/__init__.py
-'''
+# notes
+#TRUE was changed from NONE in /Users/james/anaconda/lib/python3.5/site-packages/flask_sqlalchemy/__init__.py
