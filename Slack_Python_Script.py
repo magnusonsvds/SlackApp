@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from slacker import Slacker
 from slack_entries_database import db
 
@@ -8,10 +8,10 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:C2rimson@localhost/slacktestdb'
 db = SQLAlchemy(app)
 
-slackconnect = Slacker("xoxp-48585661490-48566956614-48957258242-7cc1bd3785")
+slackconnect = Slacker("xoxp-48585661490-48566956614-48985030439-bcbbfeeab3")
 
 
 def getUserInformation():
@@ -85,18 +85,18 @@ def sendUsersToDatabase(users):
 
 
 def sendMessagesToDatabase(messages):
-    for message in messages:
-        userId = message[0]
-        text = message[1]
-        datetime = datetime(message[2])
-        channel = message[3]
-        counter +=1
-        new_message = message(userId, channel, datetime,  text)
+    for mess in messages:
+        userId = mess[0]
+        text = mess[1]
+        date = datetimeChange(mess[2])
+        channel = mess[3]
+
+        new_message = message(userId, channel, date, text)
         db.session.add(new_message)
         
 
-def datetime(timestamp):
-    datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+def datetimeChange(timestamp):
+    return datetime.fromtimestamp(float(timestamp))
 
 def Query():
     messages = message.query.all()
@@ -108,4 +108,5 @@ if __name__ == '__main__':
     messages = getMessageInfo("C1EGNU95L")
     users = getUserInformation()
 
+    pushData(messages, users, channels)
     print (Query())
