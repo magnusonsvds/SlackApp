@@ -43,8 +43,8 @@ class message_channel(db.Model):
 
 class message(db.Model):
     message_id = db.Column(db.Integer, primary_key=True)
-    slack_user_id = db.Column(db.BigInteger, db.ForeignKey(slack_user.slack_user_id))
-    channel_id = db.Column(db.BigInteger, db.ForeignKey(message_channel.channel_id))
+    slack_user_id = db.Column(db.Integer, db.ForeignKey(slack_user.slack_user_id))
+    channel_id = db.Column(db.Integer, db.ForeignKey(message_channel.channel_id))
     date_time = db.Column(db.DateTime)
     msg = db.Column(db.String(2000))
     slack_user = db.relationship(slack_user)
